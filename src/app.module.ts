@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ContentModule } from './content/content.module';
 
 @Module({
   imports: [
@@ -9,7 +10,8 @@ import { MongooseModule } from '@nestjs/mongoose';
       connectTimeoutMS: 30000, // 30 seconds
       socketTimeoutMS: 45000,
       serverSelectionTimeoutMS: 30000,
-    })
+    }),
+    ContentModule
   ]
 })
 export class AppModule {}
