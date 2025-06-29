@@ -312,4 +312,21 @@ export class AIImageService {
   async getAIImagesByAIImageId(ai_image_id: string): Promise<AIImage[]> {
     return await this.aiImageModel.find({ ai_image_ids: ai_image_id }).exec();
   }
+
+  async getAIImagesByContentId(content_id: string): Promise<AIImage[]> {
+    try {
+      console.log(`🔍 Fetching AI images for content_id: ${content_id}`);
+      
+      const aiImages = await this.aiImageModel.find({ content_id }).exec();
+      
+      console.log(`✅ Found ${aiImages.length} AI images for content_id: ${content_id}`);
+      return aiImages;
+    } catch (error) {
+      console.error('❌ Error fetching AI images by content_id:', error);
+      throw new HttpException(
+        'Failed to fetch AI images by content_id',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 } 

@@ -1,0 +1,21 @@
+/*
+// This is the code to generate text using the Gemini model
+
+import { GoogleGenAI } from "@google/genai";
+
+const ai = new GoogleGenAI({});
+
+async function main() {
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: "Explain how AI works",
+    config: {
+      temperature: 0.1,
+    },
+  });
+  console.log(response.text);
+}
+
+await main();
+
+*/

@@ -97,4 +97,16 @@ export class AIImageController {
       );
     }
   }
+
+  @Get('content/:content_id')
+  async getAIImagesByContentId(@Param('content_id') content_id: string): Promise<AIImage[]> {
+    try {
+      return await this.aiImageService.getAIImagesByContentId(content_id);
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Failed to get AI images by content ID',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 } 

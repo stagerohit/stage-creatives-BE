@@ -2,7 +2,15 @@ import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Content, ContentDocument } from './content.schema';
-import { ContentDetailResponse, CreateContentResponseDto } from './dto';
+import { ContentDetailResponse, CreateContentResponseDto, ContentWithAssetsDto } from './dto';
+
+// Import all related schemas
+import { Image, ImageDocument } from '../media-processing/schemas/image.schema';
+import { Poster, PosterDocument } from '../posters/schemas/poster.schema';
+import { TitleLogo, TitleLogoDocument } from '../ai-assets/schemas/title-logo.schema';
+import { Tagline, TaglineDocument } from '../ai-assets/schemas/tagline.schema';
+import { Copy, CopyDocument } from '../ai-assets/schemas/copy.schema';
+import { AIImage, AIImageDocument } from '../ai-assets/schemas/ai-image.schema';
 
 @Injectable()
 export class ContentService {
@@ -11,7 +19,13 @@ export class ContentService {
   private readonly authToken = 'eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3NTM1MDg1NzQsImlhdCI6MTc1MDkxNjU3NCwickV4cCI6MTc1MzUwODU3NDEzNCwicklkIjoiIiwidHlwZSI6ImFjY2VzcyIsInVzZXJJZCI6IjY4MjMyNmUwNDU1ZmFlYTY2ZDMzMzk4ZCJ9.XYHKoTjiy0WfLQUxki2bba_6Ysu1YqRloqpXgE34WQw';
 
   constructor(
-    @InjectModel(Content.name) private contentModel: Model<ContentDocument>
+    @InjectModel(Content.name) private contentModel: Model<ContentDocument>,
+    @InjectModel(Image.name) private imageModel: Model<ImageDocument>,
+    @InjectModel(Poster.name) private posterModel: Model<PosterDocument>,
+    @InjectModel(TitleLogo.name) private titleLogoModel: Model<TitleLogoDocument>,
+    @InjectModel(Tagline.name) private taglineModel: Model<TaglineDocument>,
+    @InjectModel(Copy.name) private copyModel: Model<CopyDocument>,
+    @InjectModel(AIImage.name) private aiImageModel: Model<AIImageDocument>,
   ) {}
 
   /**
@@ -187,6 +201,101 @@ export class ContentService {
       throw new HttpException(
         'Internal server error while fetching content detail',
         HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async getContentWithAllAssets(content_id: string): Promise<ContentWithAssetsDto> {
+    try {
+      console.log(`🔍 Fetching content and all assets for: ${content_id}`);
+
+      // Fetch content
+      const content = await this.contentModel.findOne({ content_id }).exec();
+      if (!content) {
+        throw new HttpException('Content not found', HttpStatus.NOT_FOUND);
+      }
+
+      // Fetch all related assets in parallel
+      const [images, posters, titleLogos, taglines, copies, aiImages] = await Promise.all([
+        this.imageModel.find({ content_id }).exec(),
+        this.posterModel.find({ content_id }).exec(),
+        this.titleLogoModel.find({ content_id }).exec(),
+        this.taglineModel.find({ content_id }).exec(),
+        this.copyModel.find({ content_id }).exec(),
+        this.aiImageModel.find({ content_id }).exec(),
+      ]);
+
+      console.log(`📊 Assets found - Images: ${images.length}, Posters: ${posters.length}, Title Logos: ${titleLogos.length}, Taglines: ${taglines.length}, Copies: ${copies.length}, AI Images: ${aiImages.length}`);
+
+      // Build response
+      const response: ContentWithAssetsDto = {
+        content: {
+          content_id: content.content_id,
+          title: content.title,
+          description: content.description,
+          genre: content.genre,
+          language: content.language,
+          created_at: content.created_at,
+        },
+        images: images.map(img => ({
+          image_id: img.images_id,
+          image_url: img.image_url,
+          image_type: img.source,
+          created_at: img.created_at,
+        })),
+        posters: posters.map(poster => ({
+          poster_id: poster.poster_id,
+          poster_url: poster.poster_url,
+          poster_type: poster.poster_type,
+          slug: poster.slug,
+          channel: poster.channel,
+          dimension: poster.dimension,
+          use_case: poster.use_case,
+          prompt_text: poster.prompt_text,
+          created_at: poster.created_at,
+        })),
+        title_logos: titleLogos.map(logo => ({
+          title_logo_id: logo.title_logo_id,
+          title_logo_url: logo.title_logo_url,
+          created_at: logo.created_at,
+        })),
+        taglines: taglines.map(tagline => ({
+          tagline_id: tagline.tagline_id,
+          text: tagline.text,
+          created_at: tagline.created_at,
+        })),
+        copies: copies.map(copy => ({
+          copy_id: copy.copy_id,
+          text: copy.text,
+          created_at: copy.created_at,
+        })),
+        ai_images: aiImages.map(aiImg => ({
+          ai_image_id: aiImg.ai_image_id,
+          ai_image_url: aiImg.ai_image_url,
+          created_at: aiImg.created_at,
+        })),
+        summary: {
+          total_images: images.length,
+          total_posters: posters.length,
+          total_title_logos: titleLogos.length,
+          total_taglines: taglines.length,
+          total_copies: copies.length,
+          total_ai_images: aiImages.length,
+          last_updated: new Date(),
+        },
+      };
+
+      console.log(`✅ Content with assets fetched successfully`);
+      return response;
+
+    } catch (error) {
+      console.error('❌ Error fetching content with assets:', error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(
+        'Failed to fetch content with assets',
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }

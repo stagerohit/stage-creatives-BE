@@ -283,4 +283,21 @@ export class ImageService {
       );
     }
   }
+
+  async getImagesByContentId(content_id: string): Promise<Image[]> {
+    try {
+      console.log(`🔍 Fetching images for content_id: ${content_id}`);
+      
+      const images = await this.imageModel.find({ content_id }).exec();
+      
+      console.log(`✅ Found ${images.length} images for content_id: ${content_id}`);
+      return images;
+    } catch (error) {
+      console.error('❌ Error fetching images by content_id:', error);
+      throw new HttpException(
+        'Failed to fetch images by content_id',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 } 

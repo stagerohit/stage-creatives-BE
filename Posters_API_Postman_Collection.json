@@ -1,0 +1,390 @@
+{
+  "info": {
+    "name": "Posters API Collection",
+    "description": "Complete collection for testing the Posters module API endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001",
+      "type": "string"
+    },
+    {
+      "key": "contentId",
+      "value": "your-existing-content-id",
+      "type": "string"
+    },
+    {
+      "key": "posterId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Generate AI Poster",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"content_id\": \"{{contentId}}\",\n  \"slug\": \"test-movie-ai\",\n  \"dimension\": \"1920:1080\",\n  \"use_case\": \"title_marketing\",\n  \"channel\": \"instagram\",\n  \"ai_image_id\": [\"your-existing-ai-image-id\"],\n  \"screenshot_ids\": [\"your-existing-image-id\"],\n  \"title_logo_id\": [\"your-existing-title-logo-id\"],\n  \"tagline_id\": [\"your-existing-tagline-id\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/posters/generate",
+          "host": ["{{baseUrl}}"],
+          "path": ["posters", "generate"]
+        },
+        "description": "Generate a poster using AI with Runway API and reference images"
+      },
+      "response": []
+    },
+    {
+      "name": "1b. Generate AI Poster (Minimal)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"content_id\": \"{{contentId}}\",\n  \"slug\": \"test-movie-minimal\",\n  \"dimension\": \"1920:1080\",\n  \"ai_image_id\": [\"your-existing-ai-image-id\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/posters/generate",
+          "host": ["{{baseUrl}}"],
+          "path": ["posters", "generate"]
+        },
+        "description": "Generate a poster with minimal required fields (use_case is optional)"
+      },
+      "response": []
+    },
+    {
+      "name": "2. Upload Human Poster",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "poster",
+              "type": "file",
+              "src": "/path/to/your/test-poster.jpg",
+              "description": "Image file to upload"
+            },
+            {
+              "key": "content_id",
+              "value": "{{contentId}}",
+              "type": "text"
+            },
+            {
+              "key": "slug",
+              "value": "test-movie-upload",
+              "type": "text"
+            },
+            {
+              "key": "use_case",
+              "value": "title_marketing",
+              "type": "text",
+              "description": "Optional field"
+            },
+            {
+              "key": "channel",
+              "value": "instagram",
+              "type": "text",
+              "description": "Optional field"
+            },
+            {
+              "key": "dimension",
+              "value": "1920:1080",
+              "type": "text",
+              "description": "Optional field"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/posters/upload",
+          "host": ["{{baseUrl}}"],
+          "path": ["posters", "upload"]
+        },
+        "description": "Upload a human-created poster file"
+      },
+      "response": []
+    },
+    {
+      "name": "2b. Upload Human Poster (Minimal)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "poster",
+              "type": "file",
+              "src": "/path/to/your/test-poster.jpg"
+            },
+            {
+              "key": "content_id",
+              "value": "{{contentId}}",
+              "type": "text"
+            },
+            {
+              "key": "slug",
+              "value": "test-movie-minimal-upload",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/posters/upload",
+          "host": ["{{baseUrl}}"],
+          "path": ["posters", "upload"]
+        },
+        "description": "Upload poster with minimal required fields"
+      },
+      "response": []
+    },
+    {
+      "name": "3. Get Poster by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/posters/{{posterId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["posters", "{{posterId}}"]
+        },
+        "description": "Get a specific poster by its ID"
+      },
+      "response": []
+    },
+    {
+      "name": "4. Get All Posters",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/posters",
+          "host": ["{{baseUrl}}"],
+          "path": ["posters"]
+        },
+        "description": "Get all posters with default pagination"
+      },
+      "response": []
+    },
+    {
+      "name": "4b. Get All Posters (with filters)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/posters?page=1&limit=5&sort=created_at&order=desc&poster_type=ai_generated",
+          "host": ["{{baseUrl}}"],
+          "path": ["posters"],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "5"
+            },
+            {
+              "key": "sort",
+              "value": "created_at"
+            },
+            {
+              "key": "order",
+              "value": "desc"
+            },
+            {
+              "key": "poster_type",
+              "value": "ai_generated"
+            }
+          ]
+        },
+        "description": "Get posters with pagination and filtering"
+      },
+      "response": []
+    },
+    {
+      "name": "5. Get Posters by Content ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/posters/content/{{contentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["posters", "content", "{{contentId}}"]
+        },
+        "description": "Get all posters for a specific content"
+      },
+      "response": []
+    },
+    {
+      "name": "6. Get Posters by Channel",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/posters/channel/instagram",
+          "host": ["{{baseUrl}}"],
+          "path": ["posters", "channel", "instagram"]
+        },
+        "description": "Get all posters for Instagram channel"
+      },
+      "response": []
+    },
+    {
+      "name": "7. Get Posters by Use Case",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/posters/use-case/title_marketing",
+          "host": ["{{baseUrl}}"],
+          "path": ["posters", "use-case", "title_marketing"]
+        },
+        "description": "Get all posters for title marketing use case"
+      },
+      "response": []
+    },
+    {
+      "name": "8a. Get AI Generated Posters",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/posters/type/ai_generated",
+          "host": ["{{baseUrl}}"],
+          "path": ["posters", "type", "ai_generated"]
+        },
+        "description": "Get all AI-generated posters"
+      },
+      "response": []
+    },
+    {
+      "name": "8b. Get Human Uploaded Posters",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/posters/type/human_uploaded",
+          "host": ["{{baseUrl}}"],
+          "path": ["posters", "type", "human_uploaded"]
+        },
+        "description": "Get all human-uploaded posters"
+      },
+      "response": []
+    },
+    {
+      "name": "9. Search Posters by Prompt Text",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/posters?prompt_text=movie&page=1&limit=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["posters"],
+          "query": [
+            {
+              "key": "prompt_text",
+              "value": "movie"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "10"
+            }
+          ]
+        },
+        "description": "Search posters by prompt text (regex search)"
+      },
+      "response": []
+    },
+    {
+      "name": "10. Filter by Multiple Criteria",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/posters?content_id={{contentId}}&channel=instagram&use_case=title_marketing&poster_type=ai_generated&page=1&limit=5",
+          "host": ["{{baseUrl}}"],
+          "path": ["posters"],
+          "query": [
+            {
+              "key": "content_id",
+              "value": "{{contentId}}"
+            },
+            {
+              "key": "channel",
+              "value": "instagram"
+            },
+            {
+              "key": "use_case",
+              "value": "title_marketing"
+            },
+            {
+              "key": "poster_type",
+              "value": "ai_generated"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "5"
+            }
+          ]
+        },
+        "description": "Filter posters by multiple criteria"
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set dynamic variables if needed",
+          "// pm.globals.set('timestamp', new Date().getTime());"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test scripts",
+          "pm.test('Status code is successful', function () {",
+          "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+          "});",
+          "",
+          "// Extract poster_id from response for use in other requests",
+          "if (pm.response.json() && pm.response.json().poster_id) {",
+          "    pm.globals.set('posterId', pm.response.json().poster_id);",
+          "}"
+        ]
+      }
+    }
+  ]
+} 

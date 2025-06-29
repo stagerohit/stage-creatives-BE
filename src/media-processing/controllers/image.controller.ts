@@ -83,4 +83,9 @@ export class ImageController {
     
     return await this.imageService.deleteImage(imageId);
   }
+
+  @Get('content/:content_id')
+  async getImagesByContentId(@Param('content_id') content_id: string) {
+    return this.imageService.getImagesByContentId(content_id);
+  }
 } 

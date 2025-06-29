@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ContentModule } from './content/content.module';
 import { AiAssetsModule } from './ai-assets/ai-assets.module';
 import { MediaProcessingModule } from './media-processing/media-processing.module';
+import { PostersModule } from './posters/posters.module';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { MediaProcessingModule } from './media-processing/media-processing.modul
     }),
     ContentModule,
     MediaProcessingModule, 
-    AiAssetsModule
+    AiAssetsModule,
+    PostersModule
   ]
 })
 export class AppModule {}
