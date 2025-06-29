@@ -28,8 +28,12 @@ async function generateImageWithReferences() {
       .waitForTaskOutput();
 
     console.log('Task complete:', task);
-    console.log('Image URL:', task.output[0]);
-    return task.output[0];
+    if (task.output && task.output.length > 0) {
+      console.log('Image URL:', task.output[0]);
+      return task.output[0];
+    } else {
+      throw new Error('No output received from Runway API');
+    }
   } catch (error) {
     if (error instanceof TaskFailedError) {
       console.error('The image failed to generate.');

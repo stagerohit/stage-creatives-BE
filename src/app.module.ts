@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ContentModule } from './content/content.module';
+import { AiAssetsModule } from './ai-assets/ai-assets.module';
 import { MediaProcessingModule } from './media-processing/media-processing.module';
 
 @Module({
@@ -13,7 +14,8 @@ import { MediaProcessingModule } from './media-processing/media-processing.modul
       serverSelectionTimeoutMS: 30000,
     }),
     ContentModule,
-    MediaProcessingModule
+    MediaProcessingModule, 
+    AiAssetsModule
   ]
 })
 export class AppModule {}

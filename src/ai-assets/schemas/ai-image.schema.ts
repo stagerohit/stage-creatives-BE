@@ -42,17 +42,10 @@ export enum AIDimension {
   DIMENSION_1680_720 = '1680:720'
 }
 
-// New enum for source image types
-export enum SourceImageType {
-  IMAGE = 'image',           // From Images collection
-  AI_IMAGE = 'ai_image'      // From AIImages collection
-}
-
-// Interface for source images with tags
-export interface SourceImage {
-  id: string;              // UUID from Images or AIImages collection
-  type: SourceImageType;   // Specifies which collection to reference
-  tag: string;             // Tag for Runway API @mention syntax
+// Interface for reference images with URL and tag
+export interface ReferenceImage {
+  url: string;
+  tag: string;
 }
 
 @Schema({ timestamps: true })
@@ -93,29 +86,47 @@ export class AIImage {
   })
   use_case?: UseCase;
 
-  // UPDATED: Replace input_image_urls, image_ids, and ai_image_ids with source_images
-  @Prop({ 
-    type: [{
-      id: { type: String, required: true },
-      type: { type: String, required: true, enum: Object.values(SourceImageType) },
-      tag: { type: String, required: true, minlength: 1, maxlength: 50 }
-    }], 
-    required: true,
-    validate: {
-      validator: function(v: SourceImage[]) {
-        return v && v.length > 0;
-      },
-      message: 'At least one source image is required'
-    }
-  })
-  source_images: SourceImage[]; // Array of source images with tags
-
-  // Keep for backwards compatibility and reference URLs generated from source_images
   @Prop({ 
     type: [String], 
-    required: false
+    required: true,
+    validate: {
+      validator: function(v: string[]) {
+        return v && v.length > 0;
+      },
+      message: 'At least one image ID is required'
+    }
   })
-  input_image_urls?: string[]; // Generated URLs from source_images
+  input_image_urls: string[]; // Array of URLs
+
+  @Prop({ 
+    type: [String], 
+    required: false,
+    ref: 'Images'
+  })
+  image_ids?: string[]; // Array of image IDs from Images collection
+
+  @Prop({ 
+    type: [String], 
+    required: false,
+    ref: 'AIImage'
+  })
+  ai_image_ids?: string[]; // Array of image IDs from AIImages collection
+
+  // New field for Runway API reference images with tags
+  @Prop({ 
+    type: [{
+      url: { type: String, required: true },
+      tag: { type: String, required: true, minlength: 1, maxlength: 50 }
+    }], 
+    required: false,
+    validate: {
+      validator: function(v: ReferenceImage[]) {
+        return !v || v.length <= 3;
+      },
+      message: 'Maximum 3 reference images allowed'
+    }
+  })
+  reference_images: ReferenceImage[]; // Array of {url, tag} objects, max 3
 
   @Prop({ 
     type: String, 
@@ -162,5 +173,4 @@ AIImageSchema.index({ slug: 1 });
 AIImageSchema.index({ channel: 1 });
 AIImageSchema.index({ use_case: 1 });
 AIImageSchema.index({ created_at: -1 });
-AIImageSchema.index({ 'source_images.id': 1 });
-AIImageSchema.index({ 'source_images.type': 1 }); 
+AIImageSchema.index({ 'reference_images.tag': 1 }); 
