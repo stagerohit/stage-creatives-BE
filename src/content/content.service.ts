@@ -205,6 +205,66 @@ export class ContentService {
     }
   }
 
+  async getContentByContentId(content_id: string): Promise<Content> {
+    try {
+      this.logger.log(`Fetching content by ID: ${content_id}`);
+
+      const content = await this.contentModel.findOne({ content_id }).exec();
+      
+      if (!content) {
+        throw new HttpException(
+          `Content with ID '${content_id}' not found`,
+          HttpStatus.NOT_FOUND
+        );
+      }
+
+      this.logger.log(`Successfully fetched content with ID: ${content_id}`);
+      return content;
+
+    } catch (error) {
+      this.logger.error('Error fetching content by ID:', error);
+      
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      
+      throw new HttpException(
+        'Internal server error while fetching content',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async getContentBySlug(slug: string): Promise<Content> {
+    try {
+      this.logger.log(`Fetching content by slug: ${slug}`);
+
+      const content = await this.contentModel.findOne({ slug }).exec();
+      
+      if (!content) {
+        throw new HttpException(
+          `Content with slug '${slug}' not found`,
+          HttpStatus.NOT_FOUND
+        );
+      }
+
+      this.logger.log(`Successfully fetched content with slug: ${slug}`);
+      return content;
+
+    } catch (error) {
+      this.logger.error('Error fetching content by slug:', error);
+      
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      
+      throw new HttpException(
+        'Internal server error while fetching content',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
   async getContentWithAllAssets(content_id: string): Promise<ContentWithAssetsDto> {
     try {
       console.log(`🔍 Fetching content and all assets for: ${content_id}`);

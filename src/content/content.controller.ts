@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query, Body, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Query, Body, Logger, Param } from '@nestjs/common';
 import { ContentService } from './content.service';
 import { CreateContentDto, CreateContentResponseDto } from './dto';
 
@@ -37,6 +37,28 @@ export class ContentController {
     const dialectStr = dialect || 'har';
     
     return await this.contentService.getContentDetail(slug, dialectStr);
+  }
+
+  @Get('content/:content_id')
+  async getContentByContentId(@Param('content_id') content_id: string) {
+    this.logger.log(`GET /content/${content_id}`);
+    
+    if (!content_id) {
+      throw new Error('Content ID parameter is required');
+    }
+    
+    return await this.contentService.getContentByContentId(content_id);
+  }
+
+  @Get('content/slug/:slug')
+  async getContentBySlug(@Param('slug') slug: string) {
+    this.logger.log(`GET /content/slug/${slug}`);
+    
+    if (!slug) {
+      throw new Error('Slug parameter is required');
+    }
+    
+    return await this.contentService.getContentBySlug(slug);
   }
 
   @Post('create-content')
