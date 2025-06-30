@@ -1,0 +1,192 @@
+Generate an image from text
+POST
+/v1/text_to_image
+This endpoint will start a new task to generate images from text.
+
+Authentication
+Authorization
+Use the HTTP Authorization header with the Bearer scheme along with an API key.
+
+Headers
+X-Runway-Version
+Required
+string
+This field must be set to the exact value 2024-11-06.
+
+Request body
+promptText
+Required
+string
+<= 1000 characters
+A non-empty string up to 1000 characters (measured in UTF-16 code units). This should describe in detail what should appear in the output.
+
+ratio
+Required
+string
+Accepted values:
+"1920:1080"
+"1080:1920"
+"1024:1024"
+"1360:768"
+"1080:1080"
+"1168:880"
+"1440:1080"
+"1080:1440"
+"1808:768"
+"2112:912"
+"1280:720"
+"720:1280"
+"720:720"
+"960:720"
+"720:960"
+"1680:720"
+The resolution of the output image(s).
+
+model
+Required
+string
+The model variant to use.
+
+This field must be set to the exact value gen4_image.
+
+seed
+integer
+[ 0 .. 4294967295 ]
+If unspecified, a random number is chosen. Varying the seed integer is a way to get different results for the same other request parameters. Using the same seed integer for an identical request will produce similar results.
+
+referenceImages
+Array of
+objects
+An array of images to be used as references for the generated image output. Up to three reference images can be provided.
+
+uri
+Required
+string
+<uri>
+A HTTPS URL or data URI containing an encoded image to be used as reference for the generated output image. See our docs on image inputs for more information.
+
+tag
+string
+A name used to refer to the image reference, from 3 to 16 characters in length. Tags must be alphanumeric (plus underscores) and start with a letter. You can refer to the reference image's tag in the prompt text with at-mention syntax: @tag. Tags are case-sensitive.
+
+contentModeration
+object
+Settings that affect the behavior of the content moderation system.
+
+publicFigureThreshold
+string
+Default:
+"auto"
+Accepted values:
+"auto"
+"low"
+When set to low, the content moderation system will be less strict about preventing generations that include recognizable public figures.
+
+Responses
+200
+The task has been successfully created.
+
+429
+You have exceeded the rate limit for this endpoint.
+
+Node SDK
+Python SDK
+cURL
+fetch()
+httpx
+
+curl -X POST https://api.dev.runwayml.com/v1/text_to_image \
+  -d '{
+    "promptText": "string",
+    "ratio": "1920:1080",
+    "seed": 4294967295,
+    "model": "gen4_image",
+    "referenceImages": [
+      {
+        "uri": "http://example.com",
+        "tag": "string"
+      }
+    ],
+    "contentModeration": {
+      "publicFigureThreshold": "auto"
+    }
+  }' \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{ YOUR API KEY }}" \
+  -H "X-Runway-Version: 2024-11-06"
+200
+
+{
+"id": "497f6eca-6276-4993-bfeb-53cbbbba6f08"
+}
+
+
+Inputs
+When starting tasks through the Runway API, you’ll often need to provide assets like images. Some restrictions exist for what you can provide.
+
+Assets can be provided via URLs or Data URIs.
+
+URLs
+In all cases, URLs must meet some basic minimum requirements:
+
+All URLs must be HTTPS.
+URLs must reference a domain name, not an IP address.
+The server should respond with valid Content-Type and Content-Length headers.
+Redirects are not followed. If the URL returns a 3XX response code, the request is considered failed.
+The length of any single URL should not exceed 2048 characters.
+The file size of the image asset that the URL points to should not exceed 16MB.
+Additionally, the server responding to the request must support HTTP HEAD requests.
+
+Content-Types
+When specifying a URL, the Content-Type response header must be specified, and it must match the media type of your asset. File extensions in URLs are not considered. The Content-Types that are supported are listed below for the supported asset types.
+
+Be aware that application/octet-stream and other generic values are explicitly not supported.
+
+User agent
+Runway will use a User-Agent header that starts with RunwayML API/ when making requests to your server. If you use a scraping-prevention tool or WAF, be sure to allowlist our user agent string prefix.
+
+Data URIs (base64 encoded images)
+A data URI allows you to pass the base64 encoded images as part of a request to our API, rather than passing a URL to the asset hosted on another server. This can reduce the complexity of your integration by eliminating an upload step.
+
+Data URIs are supported anywhere URLs are expected. However, they come with some restrictions:
+
+The length of the encoded data URI must be under 5MB (1024 × 1024 × 5 bytes). Keep in mind that base64-encoding your asset increases its size by about 33%: this means that you may not be able to use data URIs with assets larger than about 3.3MB. This limit supersedes type-specific file size limits.
+The data URI must include an appropriate content type string. For instance, your data URI should start with something like data:image/jpg;base64,.
+If a data URI is not base64 encoded, it may not be accepted.
+
+Considerations
+If you do not already have your asset stored in object storage, submitting your asset with a data URI can save you a step. Using a data URI may also help to reduce the latency of API calls.
+
+However, the ~3MB limit may be too small for some assets, especially for video. If you cannot be sure that all assets are safely within the 5MB un-encoded size limit, you should upload assets to object storage instead. Uploaded assets (in other words, using a URL) have a limit of 16MB per image.
+
+Type-specific requirements
+Images
+For fields that accept images, the asset referenced by the URL must use one of the following codecs, along with the corresponding Content-Type header:
+
+Codec	Content-Type header
+JPEG	image/jpg or image/jpeg
+PNG	image/png
+WebP	image/webp
+All images are limited to 16MB.
+
+Aspect ratios and auto-cropping
+Gen-4 Turbo supports Landscape 1280:720 1584:672 1104:832, Portrait 720:1280 832:1104 and Square 960:960 outputs.
+
+Gen-3 Alpha Turbo supports 1280:768 or 768:1280 outputs.
+
+If your input asset is not exactly of the above listed ratios, the model will auto-crop your asset from the center to the aspect ratio parameter provided.
+
+After a task succeeds, the GET /v1/tasks/:id endpoint will return a response like this:
+
+{
+  "id": "d2e3d1f4-1b3c-4b5c-8d46-1c1d7ee86892",
+  "status": "SUCCEEDED",
+  "createdAt": "2024-06-27T19:49:32.335Z",
+  "output": [
+    "https://dnznrvs05pmza.cloudfront.net/output.mp4?_jwt=..."
+  ]
+}
+
+The output member will contain one or more URLs that link to the result of your generation.
+
+It’s important to note that these URLs are ephemeral: they will expire within 24-48 hours of accessing the API. We expect you to download the data at this endpoint and save it to your own storage. Since these URLs will expire, do not expose them directly in your product.

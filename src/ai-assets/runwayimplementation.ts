@@ -1,4 +1,4 @@
-// Runway API Implementation Example for AI Image Generation
+/*// Runway API Implementation Example for AI Image Generation
 
 import RunwayML, { TaskFailedError } from '@runwayml/sdk';
 
@@ -46,3 +46,5 @@ async function generateImageWithReferences() {
 }
 
 export { generateImageWithReferences };
+
+*/

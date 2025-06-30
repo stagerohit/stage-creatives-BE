@@ -25,4 +25,8 @@ export class UploadImageDto {
   @IsOptional()
   @IsEnum(ImageDimension)
   dimension?: ImageDimension;
+
+  @IsOptional()
+  @IsEnum(ImageDimension)
+  timestamp?: number;
 } 
