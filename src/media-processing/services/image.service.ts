@@ -214,7 +214,10 @@ export class ImageService {
     try {
       this.logger.log(`Getting image by ID: ${imageId}`);
 
-      const image = await this.imageModel.findOne({ images_id: imageId });
+      // Remove file extension if present (e.g., convert "uuid.jpg" to "uuid")
+      const cleanImageId = imageId.includes('.') ? imageId.split('.')[0] : imageId;
+
+      const image = await this.imageModel.findOne({ images_id: cleanImageId });
 
       if (!image) {
         throw new HttpException(
@@ -243,7 +246,10 @@ export class ImageService {
     try {
       this.logger.log(`Deleting image: ${imageId}`);
 
-      const image = await this.imageModel.findOne({ images_id: imageId });
+      // Remove file extension if present (e.g., convert "uuid.jpg" to "uuid")
+      const cleanImageId = imageId.includes('.') ? imageId.split('.')[0] : imageId;
+
+      const image = await this.imageModel.findOne({ images_id: cleanImageId });
 
       if (!image) {
         throw new HttpException(
@@ -261,13 +267,13 @@ export class ImageService {
       }
 
       // Delete from database
-      await this.imageModel.deleteOne({ images_id: imageId });
+      await this.imageModel.deleteOne({ images_id: cleanImageId });
 
-      this.logger.log(`Successfully deleted image: ${imageId}`);
+      this.logger.log(`Successfully deleted image: ${cleanImageId}`);
 
       return {
         message: 'Image deleted successfully',
-        images_id: imageId
+        images_id: cleanImageId
       };
 
     } catch (error) {

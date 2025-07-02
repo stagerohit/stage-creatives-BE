@@ -24,7 +24,7 @@ export class AIImageService {
   private readonly uploadsPath = path.join(process.cwd(), 'uploads', 'ai-images');
   
   // TODO: Update this URL when switching to S3
-  private readonly baseUrl = 'https://16c0-2401-4900-1c64-fe0b-556a-5cc7-44bf-c279.ngrok-free.app';
+  private readonly baseUrl = 'https://fc6d-2401-4900-1c22-1687-35f1-2b8-10ed-eabd.ngrok-free.app';
   
   // Temporary flag for testing without ngrok
   private readonly useMockMode = false; // Set to true for mock mode, false for real Runway API

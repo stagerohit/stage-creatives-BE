@@ -166,26 +166,52 @@ import { VideoService } from '../services/video.service';
       }
     }
   
-    /**
-     * Delete video and associated screenshots
-     * DELETE /videos/:video_id
-     */
-    @Delete(':video_id')
-    async deleteVideo(@Param('video_id') videoId: string) {
-      try {
-        const result = await this.videoService.deleteVideo(videoId);
-        
-        return {
-          statusCode: HttpStatus.OK,
-          message: result.message,
-          data: {
-            video_id: videoId,
-            deleted: true,
-          },
-        };
-      } catch (error) {
-        this.logger.error(`Delete video failed: ${error.message}`, error.stack);
-        throw error;
-      }
+      /**
+   * Get all videos for a specific content
+   * GET /videos/content/:content_id
+   */
+  @Get('content/:content_id')
+  async getVideosByContentId(@Param('content_id') content_id: string) {
+    try {
+      this.logger.log(`GET /videos/content/${content_id}`);
+      
+      const videos = await this.videoService.getVideosByContentId(content_id);
+      
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Videos retrieved successfully',
+        data: {
+          content_id: content_id,
+          videos: videos,
+          count: videos.length,
+        },
+      };
+    } catch (error) {
+      this.logger.error(`Get videos by content ID failed: ${error.message}`, error.stack);
+      throw error;
     }
+  }
+
+  /**
+   * Delete video and associated screenshots
+   * DELETE /videos/:video_id
+   */
+  @Delete(':video_id')
+  async deleteVideo(@Param('video_id') videoId: string) {
+    try {
+      const result = await this.videoService.deleteVideo(videoId);
+      
+      return {
+        statusCode: HttpStatus.OK,
+        message: result.message,
+        data: {
+          video_id: videoId,
+          deleted: true,
+        },
+      };
+    } catch (error) {
+      this.logger.error(`Delete video failed: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
   }

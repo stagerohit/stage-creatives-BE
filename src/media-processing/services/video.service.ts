@@ -65,7 +65,7 @@ export class VideoService {
       });
 
       // Trigger screenshot generation in background
-      const pulse = uploadVideoDto.pulse ? parseInt(uploadVideoDto.pulse) : 60000; // Default 1 minute
+      const pulse = uploadVideoDto.pulse ? parseInt(uploadVideoDto.pulse) : 1000; // Default 1 minute
       this.generateScreenshotsBackground(savedVideo, videoPath, pulse);
 
       return {
@@ -159,6 +159,27 @@ export class VideoService {
       resolution: video.resolution,
       timestamp: video.timestamp
     };
+  }
+
+  /**
+   * Get all videos for a specific content ID
+   */
+  async getVideosByContentId(content_id: string): Promise<VideoDocument[]> {
+    try {
+      this.logger.log(`Fetching videos for content_id: ${content_id}`);
+
+      const videos = await this.videoModel
+        .find({ content_id })
+        .sort({ created_at: -1 })
+        .exec();
+
+      this.logger.log(`Found ${videos.length} videos for content_id: ${content_id}`);
+      return videos;
+
+    } catch (error) {
+      this.logger.error(`Error fetching videos by content_id: ${error.message}`, error.stack);
+      throw new BadRequestException(`Failed to fetch videos for content: ${error.message}`);
+    }
   }
 
   /**
@@ -337,7 +358,7 @@ export class VideoService {
               content_id: video.content_id,
               slug: video.slug,
               original_name: `screenshot_${Math.round(timestamp)}s.jpg`,
-              image_url: `/images/${screenshotFilename}`,
+              image_url: `/uploads/images/${screenshotFilename}`,
               source: ImageSource.VIDEO_UPLOAD,
               video_id: video.video_id,
               dimension: this.detectDimension(video.resolution)
