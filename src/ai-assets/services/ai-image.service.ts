@@ -9,7 +9,7 @@ import RunwayML, { TaskFailedError } from '@runwayml/sdk';
 
 import { AIImage, AIImageDocument, ReferenceImage } from '../schemas/ai-image.schema';
 import { Image, ImageDocument } from '../../media-processing/schemas/image.schema';
-import { CreateAIImageDto, AIImageQueryDto } from '../dto';
+import { CreateAIImageDto, CreateAIImageRunwayDto, AIImageQueryDto } from '../dto';
 
 /**
  * AI Image Service for Runway API integration
@@ -24,7 +24,7 @@ export class AIImageService {
   private readonly uploadsPath = path.join(process.cwd(), 'uploads', 'ai-images');
   
   // TODO: Update this URL when switching to S3
-  private readonly baseUrl = 'https://fc6d-2401-4900-1c22-1687-35f1-2b8-10ed-eabd.ngrok-free.app';
+  private readonly baseUrl = 'https://c521-14-195-110-75.ngrok-free.app';
   
   // Temporary flag for testing without ngrok
   private readonly useMockMode = false; // Set to true for mock mode, false for real Runway API
@@ -43,61 +43,230 @@ export class AIImageService {
     }
   }
 
-  async generateAIImage(createAIImageDto: CreateAIImageDto): Promise<AIImage> {
-    console.log('🎯 AI Image Service - generateAIImage called');
-    const { image_ids, ai_image_ids, prompt, dimension, content_id, slug, channel, use_case } = createAIImageDto;
-    console.log('📊 Input params:', { image_ids, ai_image_ids, prompt, dimension, content_id, slug, channel, use_case });
+  /**
+   * Map Runway ratio format to our AIDimension enum value
+   */
+  private mapRatioToDimension(ratio: string): string {
+    // The enum values are the ratio strings themselves, not the enum keys
+    const validRatios = [
+      '1920:1080', '1080:1920', '1024:1024', '1360:768', '1080:1080',
+      '1168:880', '1440:1080', '1080:1440', '1808:768', '2112:912',
+      '1280:720', '720:1280', '720:720', '960:720', '720:960', '1680:720'
+    ];
 
-    // Validate that at least one source is provided
-    if ((!image_ids || image_ids.length === 0) && (!ai_image_ids || ai_image_ids.length === 0)) {
-      console.error('❌ Validation failed: No source images provided');
-      throw new HttpException('At least one image_id or ai_image_id is required', HttpStatus.BAD_REQUEST);
+    if (validRatios.includes(ratio)) {
+      return ratio; // Return the ratio as-is since enum values are the ratio strings
+    }
+
+    // Default to 1920:1080 if ratio not found
+    console.warn(`⚠️ Unknown ratio: ${ratio}, defaulting to 1920:1080`);
+    return '1920:1080';
+  }
+
+  async generateWithRunway(createAIImageRunwayDto: CreateAIImageRunwayDto): Promise<AIImage> {
+    console.log('🎯 AI Image Service - generateWithRunway called');
+    const { content_id, slug, ratio, promptText, referenceImages, channel, use_case } = createAIImageRunwayDto;
+    console.log('📊 Input params:', { content_id, slug, ratio, promptText, referenceImages, channel, use_case });
+
+    // Validate reference images (max 3)
+    if (referenceImages.length > 3) {
+      throw new HttpException('Maximum 3 reference images allowed', HttpStatus.BAD_REQUEST);
     }
 
     try {
-      console.log('🔍 Step 1: Building reference images...');
-      // Step 1: Fetch URLs from Images and AIImages collections
-      const referenceImages = await this.buildReferenceImages(image_ids, ai_image_ids);
-      console.log('✅ Reference images built:', referenceImages);
-      
+      console.log('🔍 Step 1: Validating and converting reference image URLs...');
+      // Step 1: Validate that all reference image URLs are accessible and convert localhost URLs
+      const convertedReferenceImages = await this.validateReferenceImageUrls(referenceImages);
+      console.log('✅ All reference images are accessible and converted');
+
       console.log('🤖 Step 2: Calling Runway API...');
-      // Step 2: Generate AI image using Runway API
-      const generatedImageUrl = await this.callRunwayAPI(prompt, dimension, referenceImages);
+      // Step 2: Generate AI image using Runway API with converted reference images
+      const generatedImageUrl = await this.callRunwayAPIWithDirectReferences(promptText, ratio, convertedReferenceImages);
       console.log('✅ Runway API response received:', generatedImageUrl);
-      
+
       console.log('💾 Step 3: Downloading and saving image...');
       // Step 3: Download and save the generated image
       const savedImagePath = await this.downloadAndSaveImage(generatedImageUrl);
       console.log('✅ Image saved to:', savedImagePath);
-      
+
       console.log('📝 Step 4: Creating database record...');
-      // Step 4: Create AIImage record in database
-      const aiImage = new this.aiImageModel({
-        ai_image_id: uuidv4(),
-        content_id,
-        slug,
-        channel,
-        use_case,
-        input_image_urls: referenceImages.map(ref => ref.url),
-        image_ids: image_ids || [],
-        ai_image_ids: ai_image_ids || [],
-        reference_images: referenceImages,
-        prompt,
-        ai_image_url: savedImagePath,
-        dimension,
-      });
+      // Step 4: Map ratio to dimension and create AIImage record
+      const mappedDimension = this.mapRatioToDimension(ratio);
+      
+              const aiImage = new this.aiImageModel({
+          ai_image_id: uuidv4(),
+          content_id,
+          slug,
+          channel,
+          use_case,
+          input_image_urls: convertedReferenceImages.map(ref => ref.uri), // Use converted reference image URLs to satisfy validation
+          image_ids: [], // Not used since we're using direct URIs
+          ai_image_ids: [], // Not used since we're using direct URIs
+          reference_images: convertedReferenceImages.map(ref => ({ url: ref.uri, tag: ref.tag })),
+          prompt: promptText,
+          ai_image_url: savedImagePath,
+          dimension: mappedDimension,
+        });
 
       const savedRecord = await aiImage.save();
       console.log('✅ AI Image record saved with ID:', savedRecord.ai_image_id);
       return savedRecord;
     } catch (error) {
-      console.error('❌ Error in generateAIImage service:', error.message);
+      console.error('❌ Error in generateWithRunway service:', error.message);
       console.error('🔍 Full error:', error);
       throw new HttpException(
         error.message || 'Failed to generate AI image',
         error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  /**
+   * Check if a URL is a localhost URL
+   */
+  private isLocalhostUrl(url: string): boolean {
+    try {
+      const parsedUrl = new URL(url);
+      return parsedUrl.hostname === 'localhost' || 
+             parsedUrl.hostname === '127.0.0.1' || 
+             parsedUrl.hostname.endsWith('.local');
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Convert localhost URL to ngrok URL
+   */
+  private convertLocalhostToNgrok(url: string): string {
+    if (!this.isLocalhostUrl(url)) {
+      return url; // Return as-is if not localhost
+    }
+
+    try {
+      const parsedUrl = new URL(url);
+      // Replace the origin (protocol + hostname + port) with ngrok URL
+      const ngrokUrl = url.replace(parsedUrl.origin, this.baseUrl);
+      console.log(`🔄 Converting localhost URL: ${url} → ${ngrokUrl}`);
+      return ngrokUrl;
+    } catch (error) {
+      console.error('❌ Failed to convert localhost URL:', error.message);
+      return url; // Return original if conversion fails
+    }
+  }
+
+  /**
+   * Validate that reference image URLs are accessible (with localhost conversion)
+   */
+  private async validateReferenceImageUrls(referenceImages: Array<{ uri: string; tag: string }>): Promise<Array<{ uri: string; tag: string }>> {
+    console.log('🔍 Validating and converting reference image URLs...');
+    
+    const convertedReferenceImages: Array<{ uri: string; tag: string }> = [];
+    
+    for (const refImage of referenceImages) {
+      // Convert localhost URLs to ngrok URLs
+      const convertedUri = this.convertLocalhostToNgrok(refImage.uri);
+      
+      try {
+        const response = await axios.head(convertedUri);
+        console.log(`✅ Image accessible: ${convertedUri} (Status: ${response.status})`);
+        
+        // Add the converted URL to the result
+        convertedReferenceImages.push({
+          uri: convertedUri,
+          tag: refImage.tag
+        });
+      } catch (error) {
+        console.error(`❌ Image NOT accessible: ${convertedUri}`, error.message);
+        throw new HttpException(
+          `Reference image not accessible: ${convertedUri}. Make sure the URL is valid and accessible.`,
+          HttpStatus.BAD_REQUEST
+        );
+      }
+    }
+    
+    return convertedReferenceImages;
+  }
+
+  /**
+   * Call Runway API with direct reference images (no database lookup needed)
+   */
+  private async callRunwayAPIWithDirectReferences(
+    promptText: string, 
+    ratio: string, 
+    referenceImages: Array<{ uri: string; tag: string }>
+  ): Promise<string> {
+    console.log('🚀 Calling Runway API with direct references:');
+    console.log('   Prompt:', promptText);
+    console.log('   Ratio:', ratio);
+    console.log('   Reference Images:', referenceImages);
+
+    // Mock mode for testing without Runway API
+    if (this.useMockMode) {
+      console.log('🧪 MOCK MODE: Simulating Runway API call');
+      console.log('📝 Would send to Runway:', {
+        model: 'gen4_image',
+        ratio: ratio,
+        promptText: promptText,
+        referenceImages: referenceImages.map(ref => ({ uri: ref.uri, tag: ref.tag }))
+      });
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Return a mock image URL
+      return 'https://picsum.photos/1920/1080?random=' + Date.now();
+    }
+
+    // Real Runway API call
+    const maxRetries = 2;
+    let attempt = 0;
+
+    while (attempt <= maxRetries) {
+      try {
+        console.log(`Calling Runway API (attempt ${attempt + 1}/${maxRetries + 1})`);
+        
+        const task = await this.runwayClient.textToImage
+          .create({
+            model: 'gen4_image',
+            ratio: ratio as any,
+            promptText: promptText,
+            referenceImages: referenceImages.map(ref => ({
+              uri: ref.uri,
+              tag: ref.tag,
+            })),
+          })
+          .waitForTaskOutput();
+
+        console.log('Runway API task completed:', task);
+        
+        if (task.output && task.output.length > 0) {
+          return task.output[0];
+        } else {
+          throw new Error('No output received from Runway API');
+        }
+      } catch (error) {
+        attempt++;
+        console.error(`Runway API attempt ${attempt} failed:`, error);
+        
+        // Check if error is a TaskFailedError (safer check)
+        if (error && typeof error === 'object' && 'taskDetails' in error) {
+          console.error('Task details:', error.taskDetails);
+        }
+        
+        if (attempt > maxRetries) {
+          throw new HttpException(
+            `Runway API failed after ${maxRetries + 1} attempts: ${error.message}`,
+            HttpStatus.SERVICE_UNAVAILABLE,
+          );
+        }
+        
+        // Wait before retry
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      }
+    }
+    
+    throw new HttpException('Runway API failed after all retry attempts', HttpStatus.SERVICE_UNAVAILABLE);
   }
 
   private async buildReferenceImages(image_ids?: string[], ai_image_ids?: string[]): Promise<ReferenceImage[]> {

@@ -1,5 +1,6 @@
 // AI Images DTOs
 export { CreateAIImageDto } from './create-ai-image.dto';
+export { CreateAIImageRunwayDto } from './create-ai-image-runway.dto';
 export { AIImageQueryDto } from './ai-image-query.dto';
 
 // Title Logo DTOs

@@ -11,7 +11,7 @@ import {
   UsePipes,
 } from '@nestjs/common';
 import { AIImageService } from '../services/ai-image.service';
-import { CreateAIImageDto, AIImageQueryDto } from '../dto';
+import { CreateAIImageDto, CreateAIImageRunwayDto, AIImageQueryDto } from '../dto';
 import { AIImage } from '../schemas/ai-image.schema';
 
 @Controller('ai-images')
@@ -22,13 +22,13 @@ export class AIImageController {
 
   @Post('generate')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async generateAIImage(@Body() createAIImageDto: CreateAIImageDto): Promise<AIImage> {
-    console.log('🚀 AI Image Controller - Generate endpoint called');
-    console.log('📝 Request body:', JSON.stringify(createAIImageDto, null, 2));
+  async generateAIImage(@Body() createAIImageRunwayDto: CreateAIImageRunwayDto): Promise<AIImage> {
+    console.log('🚀 AI Image Controller - Generate with Runway endpoint called');
+    console.log('📝 Request body:', JSON.stringify(createAIImageRunwayDto, null, 2));
     
     try {
-      console.log('🔄 Calling AI Image Service...');
-      const result = await this.aiImageService.generateAIImage(createAIImageDto);
+      console.log('🔄 Calling AI Image Service with Runway API...');
+      const result = await this.aiImageService.generateWithRunway(createAIImageRunwayDto);
       console.log('✅ AI Image generated successfully:', result.ai_image_id);
       return result;
     } catch (error) {

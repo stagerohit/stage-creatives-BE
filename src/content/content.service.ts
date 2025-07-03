@@ -108,7 +108,7 @@ export class ContentService {
     }
   }
 
-  async getAllContent(page: number = 1, perPage: number = 10, dialect: string = 'har') {
+  async getAllContent(page: number = 1, perPage: number = 100, dialect: string = 'har') {
     try {
       const params = new URLSearchParams({
         page: page.toString(),
@@ -189,6 +189,7 @@ export class ContentService {
 
       const data = await response.json();
       this.logger.log(`Successfully fetched content detail for slug: ${slug}`);
+      console.log(data);
       
       return data;
     } catch (error) {

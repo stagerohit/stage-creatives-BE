@@ -24,7 +24,7 @@ import { CreatePosterDto, UploadPosterDto, PosterQueryDto } from '../dto';
 @Injectable()
 export class PosterService {
   private readonly runwayClient: RunwayML;
-  private readonly baseUrl = 'https://fc6d-2401-4900-1c22-1687-35f1-2b8-10ed-eabd.ngrok-free.app'; // ngrok URL
+  private readonly baseUrl =   'https://c521-14-195-110-75.ngrok-free.app'; // ngrok URL
   private readonly useMockMode = true; // Set to true for testing without Runway API
 
   constructor(

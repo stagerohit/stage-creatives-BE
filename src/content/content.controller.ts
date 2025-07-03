@@ -17,7 +17,7 @@ export class ContentController {
     this.logger.log(`GET /content/all - page: ${page}, perPage: ${perPage}, dialect: ${dialect}`);
     
     const pageNum = page ? parseInt(page, 10) : 1;
-    const perPageNum = perPage ? parseInt(perPage, 10) : 10;
+    const perPageNum = perPage ? parseInt(perPage, 100) : 100;
     const dialectStr = dialect || 'har';
 
     return await this.contentService.getAllContent(pageNum, perPageNum, dialectStr);
