@@ -11,6 +11,7 @@ import {
   HttpStatus 
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { PosterService } from '../services/poster.service';
 import { CreatePosterDto, UploadPosterDto, PosterQueryDto } from '../dto';
 import { Poster, PosterType } from '../schemas/poster.schema';
@@ -48,7 +49,12 @@ export class PosterController {
    * POST /posters/upload
    */
   @Post('upload')
-  @UseInterceptors(FileInterceptor('poster'))
+  @UseInterceptors(FileInterceptor('poster', {
+    storage: memoryStorage(),
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB limit
+    },
+  }))
   async uploadPoster(
     @Body() uploadPosterDto: UploadPosterDto,
     @UploadedFile() file: Express.Multer.File

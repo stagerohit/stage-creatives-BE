@@ -24,7 +24,7 @@ import { CreatePosterDto, UploadPosterDto, PosterQueryDto } from '../dto';
 @Injectable()
 export class PosterService {
   private readonly runwayClient: RunwayML;
-  private readonly baseUrl =   'https://c521-14-195-110-75.ngrok-free.app'; // ngrok URL
+  private readonly baseUrl = 'https://c521-14-195-110-75.ngrok-free.app'; // ngrok URL
   private readonly useMockMode = true; // Set to true for testing without Runway API
 
   constructor(
@@ -359,10 +359,23 @@ export class PosterService {
   }
 
   private async saveUploadedFile(file: Express.Multer.File): Promise<string> {
+    console.log('💾 Saving uploaded file:', {
+      originalname: file.originalname,
+      size: file.size,
+      mimetype: file.mimetype,
+      hasBuffer: !!file.buffer,
+      bufferSize: file.buffer?.length
+    });
+
+    if (!file.buffer) {
+      throw new HttpException('File buffer is missing', HttpStatus.BAD_REQUEST);
+    }
+
     const filename = `${uuidv4()}.${file.originalname.split('.').pop()}`;
     const filepath = path.join(process.cwd(), 'uploads', 'posters', filename);
     
     fs.writeFileSync(filepath, file.buffer);
+    console.log('✅ File saved successfully:', filepath);
     return `/uploads/posters/${filename}`;
   }
 
