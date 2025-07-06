@@ -11,9 +11,19 @@ async function bootstrap() {
   // Create application instance
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Serve static files for uploaded images
+  // Serve static files for uploaded images with CORS headers
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
     prefix: '/uploads/',
+    setHeaders: (res, path) => {
+      // Add CORS headers for image access
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      
+      // Add cache control for images
+      res.setHeader('Cache-Control', 'public, max-age=31536000');
+    },
   });
 
   // Enable global validation pipe
@@ -23,11 +33,14 @@ async function bootstrap() {
     transform: true,
   }));
 
-  // Enable CORS (adjust as needed)
+  // Enable CORS for frontend development
   app.enableCors({
-    origin: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    origin: ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5174'], // Common frontend dev ports
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
     credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 200,
   });
 
   // Start listening

@@ -8,10 +8,13 @@ import {
   UseInterceptors,
   UploadedFile,
   HttpException, 
-  HttpStatus 
+  HttpStatus,
+  Options,
+  Res 
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
+import { Response } from 'express';
 import { PosterService } from '../services/poster.service';
 import { CreatePosterDto, UploadPosterDto, PosterQueryDto } from '../dto';
 import { Poster, PosterType } from '../schemas/poster.schema';
@@ -42,6 +45,20 @@ export class PosterController {
         error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  /**
+   * Handle preflight OPTIONS request for poster upload
+   * OPTIONS /posters/upload
+   */
+  @Options('upload')
+  async uploadPosterOptions(@Res() res: Response): Promise<void> {
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
+    res.status(200).end();
   }
 
   /**
