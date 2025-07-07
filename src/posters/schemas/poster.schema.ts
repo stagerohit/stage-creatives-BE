@@ -2,9 +2,10 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import { Dimension } from '../../schemas/common/dimension.enum';
+import { Channel } from '../../schemas/common/channel.enum';
 
 // Import existing enums from ai-assets
-import { Channel, UseCase } from '../../ai-assets/schemas/ai-image.schema';
+import { UseCase } from '../../ai-assets/schemas/ai-image.schema';
 
 export enum PosterType {
   AI_GENERATED = 'ai_generated',

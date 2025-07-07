@@ -1,6 +1,6 @@
 import { IsString, IsUUID, IsOptional, IsEnum, IsNotEmpty } from 'class-validator';
-import { Channel } from '../schemas/tagline.schema';
 import { Dimension } from '../../schemas/common/dimension.enum';
+import { Channel } from '../../schemas/common/channel.enum';
 
 export class CreateTaglineDto {
   @IsUUID()

@@ -1,17 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { Dimension } from '../../schemas/common/dimension.enum';
-
-// Enum for supported channels
-export enum Channel {
-  INSTAGRAM = 'INSTAGRAM',
-  FACEBOOK = 'FACEBOOK',
-  TWITTER = 'TWITTER',
-  YOUTUBE = 'YOUTUBE',
-  LINKEDIN = 'LINKEDIN',
-  TIKTOK = 'TIKTOK',
-  PINTEREST = 'PINTEREST',
-}
+import { Channel } from '../../schemas/common/channel.enum';
 
 @Schema({ timestamps: true })
 export class TitleLogo {

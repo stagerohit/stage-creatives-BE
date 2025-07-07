@@ -1,6 +1,7 @@
 import { IsString, IsOptional, IsArray, IsEnum, MinLength, MaxLength, IsUUID } from 'class-validator';
-import { Channel, UseCase } from '../schemas/ai-image.schema';
+import { UseCase } from '../schemas/ai-image.schema';
 import { Dimension } from '../../schemas/common/dimension.enum';
+import { Channel } from '../../schemas/common/channel.enum';
 
 export class CreateAIImageDto {
   @IsString()

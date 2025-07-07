@@ -1,5 +1,5 @@
 import { IsString, IsUUID, IsOptional, IsEnum, IsNotEmpty } from 'class-validator';
-import { Channel } from '../schemas/copy.schema';
+import { Channel } from '../../schemas/common/channel.enum';
 
 export class CreateCopyDto {
   // Content ID from Content collection

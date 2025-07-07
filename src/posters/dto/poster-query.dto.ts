@@ -1,8 +1,9 @@
 import { IsOptional, IsString, IsEnum, IsNumber, Min } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Channel, UseCase } from '../../ai-assets/schemas/ai-image.schema';
+import { UseCase } from '../../ai-assets/schemas/ai-image.schema';
 import { PosterType } from '../schemas/poster.schema';
 import { Dimension } from '../../schemas/common/dimension.enum';
+import { Channel } from '../../schemas/common/channel.enum';
 
 export class PosterQueryDto {
   @IsOptional()

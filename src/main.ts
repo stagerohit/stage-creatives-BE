@@ -16,7 +16,7 @@ async function bootstrap() {
     prefix: '/uploads/',
     setHeaders: (res, path) => {
       // Add CORS headers for image access
-      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5185');
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5174');
       res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
       res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -35,7 +35,7 @@ async function bootstrap() {
 
   // Enable CORS for frontend development
   app.enableCors({
-    origin: ['http://localhost:5185', 'http://localhost:3000', 'http://localhost:5174'], // Common frontend dev ports
+    origin: ['http://localhost:5174', 'http://localhost:3000', 'http://localhost:5174'], // Common frontend dev ports
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
     credentials: true,

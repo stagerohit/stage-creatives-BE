@@ -1,6 +1,7 @@
 import { IsString, IsOptional, IsArray, IsEnum, MinLength, MaxLength, IsUUID, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Channel, UseCase } from '../schemas/ai-image.schema';
+import { UseCase } from '../schemas/ai-image.schema';
+import { Channel } from '../../schemas/common/channel.enum';
 
 class ReferenceImageDto {
   @IsString()

@@ -1,6 +1,7 @@
 import { IsString, IsUUID, IsOptional, IsEnum, IsArray } from 'class-validator';
-import { Channel, UseCase } from '../../ai-assets/schemas/ai-image.schema';
+import { UseCase } from '../../ai-assets/schemas/ai-image.schema';
 import { Dimension } from '../../schemas/common/dimension.enum';
+import { Channel } from '../../schemas/common/channel.enum';
 
 export class UploadPosterDto {
   @IsUUID()

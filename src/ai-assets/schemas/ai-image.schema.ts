@@ -2,19 +2,9 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import { Dimension } from '../../schemas/common/dimension.enum';
+import { Channel } from '../../schemas/common/channel.enum';
 
 export type AIImageDocument = AIImage & Document;
-
-export enum Channel {
-  FACEBOOK = 'facebook',
-  INSTAGRAM = 'instagram',
-  YOUTUBE = 'youtube',
-  TWITTER = 'twitter',
-  LINKEDIN = 'linkedin',
-  TIKTOK = 'tiktok',
-  WHATSAPP = 'whatsapp',
-  CLEVERTAP = 'clevertap'
-}
 
 export enum UseCase {
   APP_THUMBNAIL = 'app_thumbnail',

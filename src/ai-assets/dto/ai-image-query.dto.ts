@@ -1,6 +1,7 @@
 import { IsOptional, IsString, IsEnum, IsInt, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Channel, UseCase } from '../schemas/ai-image.schema';
+import { UseCase } from '../schemas/ai-image.schema';
+import { Channel } from '../../schemas/common/channel.enum';
 
 export class AIImageQueryDto {
   @IsOptional()

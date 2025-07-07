@@ -1,6 +1,6 @@
 import { IsOptional, IsString, IsEnum, IsInt, Min, Max } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { Channel } from '../schemas/copy.schema';
+import { Channel } from '../../schemas/common/channel.enum';
 
 export class CopyQueryDto {
   // Filter by Content ID
