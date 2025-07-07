@@ -1,6 +1,7 @@
 import { IsOptional, IsString, IsEnum, IsInt, Min, Max } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { Channel, Dimension } from '../schemas/tagline.schema';
+import { Channel } from '../schemas/tagline.schema';
+import { Dimension } from '../../schemas/common/dimension.enum';
 
 export class TaglineQueryDto {
   @IsOptional()
@@ -20,7 +21,7 @@ export class TaglineQueryDto {
   channel?: Channel;
 
   @IsOptional()
-  @IsEnum(Dimension)
+  @IsEnum(Dimension, { message: 'Dimension is not valid' })
   dimension?: Dimension;
 
   @IsOptional()

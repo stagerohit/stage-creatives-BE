@@ -1,9 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
+import { Dimension } from '../../schemas/common/dimension.enum';
 
 // Import existing enums from ai-assets
-import { Channel, UseCase, AIDimension } from '../../ai-assets/schemas/ai-image.schema';
+import { Channel, UseCase } from '../../ai-assets/schemas/ai-image.schema';
 
 export enum PosterType {
   AI_GENERATED = 'ai_generated',
@@ -43,10 +44,10 @@ export class Poster {
 
   @Prop({ 
     type: String, 
-    enum: Object.values(AIDimension),
+    enum: Object.values(Dimension),
     required: false 
   })
-  dimension?: AIDimension;
+  dimension?: Dimension;
 
   @Prop({ 
     type: [String], 

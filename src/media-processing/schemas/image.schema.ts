@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
+import { Dimension } from '../../schemas/common/dimension.enum';
 
 export type ImageDocument = Image & Document;
 
@@ -9,29 +10,6 @@ export enum ImageSource {
   TRAILER = 'trailer',
   IMAGE_UPLOAD = 'image_upload',
   ORIGINAL_CONTENT = 'original_content'
-}
-
-export enum ImageDimension {
-  SQUARE = '1:1',
-  PORTRAIT_4_5 = '4:5',
-  VERTICAL_9_16 = '9:16',
-  LANDSCAPE_16_9 = '16:9',
-  PORTRAIT_2_3 = '2:3',
-  PORTRAIT_3_4 = '3:4',
-  LANDSCAPE_5_4 = '5:4',
-  LANDSCAPE_3_2 = '3:2',
-  ULTRA_WIDE_2_1 = '2:1',
-  VERTICAL_1_2 = '1:2',
-  STANDARD_4_3 = '4:3',
-  ULTRA_WIDE_3_1 = '3:1',
-  VERTICAL_1_3 = '1:3',
-  CINEMA_21_9 = '21:9',
-  CINEMA_21_10 = '21:10',
-  LANDSCAPE_5_2 = '5:2',
-  LANDSCAPE_7_5 = '7:5',
-  LANDSCAPE_8_5 = '8:5',
-  LANDSCAPE_10_3 = '10:3',
-  LANDSCAPE_11_4 = '11:4'
 }
 
 @Schema({ timestamps: true })
@@ -101,9 +79,9 @@ export class Image {
   @Prop({ 
     type: String, 
     required: false,
-    enum: Object.values(ImageDimension)
+    enum: Object.values(Dimension)
   })
-  dimension?: ImageDimension;
+  dimension?: Dimension;
 
   @Prop({ 
     type: String, 

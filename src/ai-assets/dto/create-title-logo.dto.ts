@@ -1,5 +1,6 @@
 import { IsString, IsUUID, IsOptional, IsEnum, IsNotEmpty } from 'class-validator';
-import { Channel, Dimension } from '../schemas/title-logo.schema';
+import { Channel } from '../schemas/title-logo.schema';
+import { Dimension } from '../../schemas/common/dimension.enum';
 
 export class CreateTitleLogoDto {
   @IsUUID()
@@ -19,6 +20,6 @@ export class CreateTitleLogoDto {
   channel?: Channel;
 
   @IsOptional()
-  @IsEnum(Dimension)
+  @IsEnum(Dimension, { message: 'Dimension is not valid' })
   dimension?: Dimension;
 } 

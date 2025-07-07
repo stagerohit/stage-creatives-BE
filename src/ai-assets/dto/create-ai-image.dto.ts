@@ -1,5 +1,6 @@
 import { IsString, IsOptional, IsArray, IsEnum, MinLength, MaxLength, IsUUID } from 'class-validator';
-import { Channel, UseCase, AIDimension } from '../schemas/ai-image.schema';
+import { Channel, UseCase } from '../schemas/ai-image.schema';
+import { Dimension } from '../../schemas/common/dimension.enum';
 
 export class CreateAIImageDto {
   @IsString()
@@ -15,8 +16,8 @@ export class CreateAIImageDto {
   @MaxLength(2000)
   prompt: string;
 
-  @IsEnum(AIDimension)
-  dimension: AIDimension;
+  @IsEnum(Dimension, { message: 'Dimension is not valid' })
+  dimension: Dimension;
 
   @IsOptional()
   @IsEnum(Channel)
@@ -30,7 +31,7 @@ export class CreateAIImageDto {
   @IsArray()
   @IsString({ each: true })
   image_ids?: string[]; // Array of image IDs from Images collection
-
+  
   @IsOptional()
   @IsArray()
   @IsString({ each: true })

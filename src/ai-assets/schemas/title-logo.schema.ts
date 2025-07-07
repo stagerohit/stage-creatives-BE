@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { Dimension } from '../../schemas/common/dimension.enum';
 
 // Enum for supported channels
 export enum Channel {
@@ -10,16 +11,6 @@ export enum Channel {
   LINKEDIN = 'LINKEDIN',
   TIKTOK = 'TIKTOK',
   PINTEREST = 'PINTEREST',
-}
-
-// Enum for supported dimensions/aspect ratios
-export enum Dimension {
-  SQUARE = '1:1',           // Square format
-  LANDSCAPE = '16:9',       // Landscape/widescreen
-  PORTRAIT = '9:16',        // Portrait/vertical
-  CINEMA = '21:9',          // Cinema/ultrawide
-  STORY = '9:16',           // Story format (same as portrait)
-  POST = '4:5',             // Social media post format
 }
 
 @Schema({ timestamps: true })

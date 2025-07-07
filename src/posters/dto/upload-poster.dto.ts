@@ -1,5 +1,6 @@
 import { IsString, IsUUID, IsOptional, IsEnum, IsArray } from 'class-validator';
-import { Channel, UseCase, AIDimension } from '../../ai-assets/schemas/ai-image.schema';
+import { Channel, UseCase } from '../../ai-assets/schemas/ai-image.schema';
+import { Dimension } from '../../schemas/common/dimension.enum';
 
 export class UploadPosterDto {
   @IsUUID()
@@ -14,8 +15,8 @@ export class UploadPosterDto {
   channel?: Channel;
 
   @IsOptional()
-  @IsEnum(AIDimension)
-  dimension?: AIDimension;
+  @IsEnum(Dimension, { message: 'Dimension is not valid' })
+  dimension?: Dimension;
 
   @IsOptional()
   @IsArray()

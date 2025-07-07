@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
+import { Dimension } from '../../schemas/common/dimension.enum';
 
 export type AIImageDocument = AIImage & Document;
 
@@ -21,25 +22,6 @@ export enum UseCase {
   SOCIAL_MEDIA_ORGANIC = 'social_media_organic',
   REENGAGEMENT = 'reengagement',
   PERFORMANCE_MARKETING = 'performance_marketing'
-}
-
-export enum AIDimension {
-  DIMENSION_1920_1080 = '1920:1080',
-  DIMENSION_1080_1920 = '1080:1920',
-  DIMENSION_1024_1024 = '1024:1024',
-  DIMENSION_1360_768 = '1360:768',
-  DIMENSION_1080_1080 = '1080:1080',
-  DIMENSION_1168_880 = '1168:880',
-  DIMENSION_1440_1080 = '1440:1080',
-  DIMENSION_1080_1440 = '1080:1440',
-  DIMENSION_1808_768 = '1808:768',
-  DIMENSION_2112_912 = '2112:912',
-  DIMENSION_1280_720 = '1280:720',
-  DIMENSION_720_1280 = '720:1280',
-  DIMENSION_720_720 = '720:720',
-  DIMENSION_960_720 = '960:720',
-  DIMENSION_720_960 = '720:960',
-  DIMENSION_1680_720 = '1680:720'
 }
 
 // Interface for reference images with URL and tag
@@ -153,9 +135,9 @@ export class AIImage {
   @Prop({ 
     type: String, 
     required: true,
-    enum: Object.values(AIDimension)
+    enum: Object.values(Dimension)
   })
-  dimension?: AIDimension;
+  dimension?: Dimension;
 
   @Prop({ 
     type: Date, 

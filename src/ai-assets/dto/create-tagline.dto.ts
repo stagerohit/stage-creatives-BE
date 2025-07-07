@@ -1,5 +1,6 @@
 import { IsString, IsUUID, IsOptional, IsEnum, IsNotEmpty } from 'class-validator';
-import { Channel, Dimension } from '../schemas/tagline.schema';
+import { Channel } from '../schemas/tagline.schema';
+import { Dimension } from '../../schemas/common/dimension.enum';
 
 export class CreateTaglineDto {
   @IsUUID()
@@ -23,6 +24,6 @@ export class CreateTaglineDto {
   channel?: Channel;
 
   @IsOptional()
-  @IsEnum(Dimension)
+  @IsEnum(Dimension, { message: 'Dimension is not valid' })
   dimension?: Dimension;
 } 

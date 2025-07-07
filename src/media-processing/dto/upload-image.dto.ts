@@ -1,5 +1,6 @@
 import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
-import { ImageDimension, ImageSource } from '../schemas/image.schema';
+import { ImageSource } from '../schemas/image.schema';
+import { Dimension } from '../../schemas/common/dimension.enum';
 
 export class UploadImageDto {
   @IsString()
@@ -23,10 +24,10 @@ export class UploadImageDto {
   video_id?: string;
 
   @IsOptional()
-  @IsEnum(ImageDimension)
-  dimension?: ImageDimension;
+  @IsEnum(Dimension, { message: 'Dimension is not valid' })
+  dimension?: Dimension;
 
   @IsOptional()
-  @IsEnum(ImageDimension)
+  @IsEnum(Dimension, { message: 'Dimension is not valid' })
   timestamp?: number;
 } 

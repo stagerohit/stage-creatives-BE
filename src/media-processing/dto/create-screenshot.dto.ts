@@ -1,5 +1,6 @@
 import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
-import { ImageDimension, ImageSource } from '../schemas/image.schema';
+import { ImageSource } from '../schemas/image.schema';
+import { Dimension } from '../../schemas/common/dimension.enum';
 
 export class CreateScreenshotDto {
   @IsString()
@@ -23,8 +24,8 @@ export class CreateScreenshotDto {
   image_url: string;
 
   @IsOptional()
-  @IsEnum(ImageDimension)
-  dimension?: ImageDimension;
+  @IsEnum(Dimension, { message: 'Dimension is not valid' })
+  dimension?: Dimension;
 
   @IsOptional()
   timestamp?: number;

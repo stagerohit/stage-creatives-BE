@@ -1,7 +1,8 @@
 import { IsOptional, IsString, IsEnum, IsNumber, Min } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Channel, UseCase, AIDimension } from '../../ai-assets/schemas/ai-image.schema';
+import { Channel, UseCase } from '../../ai-assets/schemas/ai-image.schema';
 import { PosterType } from '../schemas/poster.schema';
+import { Dimension } from '../../schemas/common/dimension.enum';
 
 export class PosterQueryDto {
   @IsOptional()
@@ -17,8 +18,8 @@ export class PosterQueryDto {
   channel?: Channel;
 
   @IsOptional()
-  @IsEnum(AIDimension)
-  dimension?: AIDimension;
+  @IsEnum(Dimension, { message: 'Dimension is not valid' })
+  dimension?: Dimension;
 
   @IsOptional()
   @IsEnum(UseCase)

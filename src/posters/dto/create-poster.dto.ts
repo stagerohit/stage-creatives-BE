@@ -1,5 +1,6 @@
 import { IsString, IsUUID, IsOptional, IsEnum, IsArray, ArrayMinSize, ValidateIf } from 'class-validator';
-import { Channel, UseCase, AIDimension } from '../../ai-assets/schemas/ai-image.schema';
+import { Channel, UseCase } from '../../ai-assets/schemas/ai-image.schema';
+import { Dimension } from '../../schemas/common/dimension.enum';
 
 export class CreatePosterDto {
   @IsUUID()
@@ -13,8 +14,8 @@ export class CreatePosterDto {
   @IsEnum(Channel)
   channel?: Channel;
 
-  @IsEnum(AIDimension)
-  dimension: AIDimension; // Required for Runway API ratio
+  @IsEnum(Dimension, { message: 'Dimension is not valid' })
+  dimension: Dimension; // Required for Runway API ratio
 
   @IsOptional()
   @IsArray()

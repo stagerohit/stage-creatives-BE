@@ -6,7 +6,8 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 import { spawn } from 'child_process';
 import { Video, VideoDocument, VideoProcessingStatus } from '../schemas/video.schema';
-import { Image, ImageDocument, ImageSource, ImageDimension } from '../schemas/image.schema';
+import { Image, ImageDocument, ImageSource } from '../schemas/image.schema';
+import { Dimension } from '../../schemas/common/dimension.enum';
 import { UploadVideoDto, VideoQueryDto, TriggerScreenshotsDto } from '../dto';
 
 @Injectable()
@@ -416,24 +417,24 @@ export class VideoService {
   /**
    * Auto-detect dimension based on resolution  
    */
-  private detectDimension(resolution?: string): ImageDimension {
-    if (!resolution) return ImageDimension.LANDSCAPE_16_9;
+  private detectDimension(resolution?: string): Dimension {
+    if (!resolution) return Dimension['1920:1080'];
 
     const [width, height] = resolution.split('x').map(Number);
-    if (!width || !height) return ImageDimension.LANDSCAPE_16_9;
+    if (!width || !height) return Dimension['1920:1080'];
 
     const aspectRatio = width / height;
     
-    // Map common aspect ratios to dimensions
-    if (Math.abs(aspectRatio - 16/9) < 0.1) return ImageDimension.LANDSCAPE_16_9;
-    if (Math.abs(aspectRatio - 4/3) < 0.1) return ImageDimension.STANDARD_4_3;
-    if (Math.abs(aspectRatio - 1) < 0.1) return ImageDimension.SQUARE;
-    if (Math.abs(aspectRatio - 9/16) < 0.1) return ImageDimension.VERTICAL_9_16;
-    if (Math.abs(aspectRatio - 3/4) < 0.1) return ImageDimension.PORTRAIT_3_4;
-    if (Math.abs(aspectRatio - 21/9) < 0.1) return ImageDimension.CINEMA_21_9;
+    // Map common aspect ratios to closest available dimensions
+    if (Math.abs(aspectRatio - 16/9) < 0.1) return Dimension['1920:1080'];
+    if (Math.abs(aspectRatio - 4/3) < 0.1) return Dimension['1440:1080'];
+    if (Math.abs(aspectRatio - 1) < 0.1) return Dimension['1024:1024'];
+    if (Math.abs(aspectRatio - 9/16) < 0.1) return Dimension['1080:1920'];
+    if (Math.abs(aspectRatio - 3/4) < 0.1) return Dimension['1080:1440'];
+    if (Math.abs(aspectRatio - 21/9) < 0.1) return Dimension['2112:912'];
     
     // Default to 16:9 if no close match
-    return ImageDimension.LANDSCAPE_16_9;
+    return Dimension['1920:1080'];
   }
 
   /**
