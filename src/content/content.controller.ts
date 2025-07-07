@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Query, Body, Logger, Param } from '@nestjs/common';
 import { ContentService } from './content.service';
-import { CreateContentDto, CreateContentResponseDto } from './dto';
+import { CreateContentDto, CreateContentResponseDto, SearchContentDto } from './dto';
 
 @Controller()
 export class ContentController {
@@ -14,13 +14,35 @@ export class ContentController {
     @Query('perPage') perPage?: string,
     @Query('dialect') dialect?: string
   ) {
-    this.logger.log(`GET /content/all - page: ${page}, perPage: ${perPage}, dialect: ${dialect}`);
+    this.logger.log(`GET /all-content - page: ${page}, perPage: ${perPage}, dialect: ${dialect}`);
     
     const pageNum = page ? parseInt(page, 10) : 1;
-    const perPageNum = perPage ? parseInt(perPage, 100) : 100;
+    const perPageNum = perPage ? parseInt(perPage, 10) : 100;
     const dialectStr = dialect || 'har';
 
     return await this.contentService.getAllContent(pageNum, perPageNum, dialectStr);
+  }
+
+  @Get('search')
+  async searchContent(
+    @Query('keyword') keyword: string,
+    @Query('dialect') dialect?: string
+  ) {
+    this.logger.log(`GET /search - keyword: ${keyword}, dialect: ${dialect}`);
+    
+    if (!keyword) {
+      throw new Error('Keyword parameter is required');
+    }
+    
+    const dialectStr = dialect || 'har';
+    
+    // Validate dialect
+    const validDialects = ['har', 'raj', 'bho'];
+    if (!validDialects.includes(dialectStr)) {
+      throw new Error('Dialect must be one of: har, raj, bho');
+    }
+
+    return await this.contentService.searchContent(keyword, dialectStr);
   }
 
   @Get('content-detail')
@@ -59,6 +81,17 @@ export class ContentController {
     }
     
     return await this.contentService.getContentBySlug(slug);
+  }
+
+  @Get('content/:content_id/assets')
+  async getContentWithAllAssets(@Param('content_id') content_id: string) {
+    this.logger.log(`GET /content/${content_id}/assets`);
+    
+    if (!content_id) {
+      throw new Error('Content ID parameter is required');
+    }
+    
+    return await this.contentService.getContentWithAllAssets(content_id);
   }
 
   @Post('create-content')

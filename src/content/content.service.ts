@@ -140,7 +140,10 @@ export class ContentService {
       const data = await response.json();
       this.logger.log(`Successfully fetched ${data?.data?.length || 0} content items`);
       
-      return data;
+      // Filter active content items
+      const filteredData = this.filterActiveContent(data);
+      
+      return filteredData;
     } catch (error) {
       this.logger.error('Error fetching content:', error);
       
@@ -153,6 +156,84 @@ export class ContentService {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
+  }
+
+  async searchContent(keyword: string, dialect: string = 'har') {
+    try {
+      const params = new URLSearchParams({
+        keyword: keyword,
+        page: '1',
+        perPage: '100',
+        dialect: dialect
+      });
+
+      const url = `${this.baseUrl}/search?${params.toString()}`;
+      
+      this.logger.log(`Searching content from: ${url}`);
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json, text/plain, */*',
+          'authorization': `Bearer ${this.authToken}`,
+          'content-type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        this.logger.error(`Search API request failed with status: ${response.status}`);
+        throw new HttpException(
+          `Failed to search content: ${response.statusText}`,
+          response.status
+        );
+      }
+
+      const data = await response.json();
+      this.logger.log(`Successfully searched content with keyword: ${keyword}, found ${data?.data?.length || 0} items`);
+      
+      // Filter active content items
+      const filteredData = this.filterActiveContent(data);
+      
+      return filteredData;
+    } catch (error) {
+      this.logger.error('Error searching content:', error);
+      
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      
+      throw new HttpException(
+        'Internal server error while searching content',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  /**
+   * Filter content items to only include active items
+   * @param data - Response data from external API
+   * @returns Filtered data with only active items
+   */
+  private filterActiveContent(data: any): any {
+    if (!data || !data.data || !Array.isArray(data.data)) {
+      return data;
+    }
+
+    const filteredItems = data.data.filter(item => {
+      // Check if item has status property and it's active/Active
+      const status = item?.status;
+      return status && (status.toLowerCase() === 'active');
+    });
+
+    this.logger.log(`Filtered ${data.data.length} items to ${filteredItems.length} active items`);
+
+    return {
+      ...data,
+      data: filteredItems,
+      // Update count if it exists
+      ...(data.total && { total: filteredItems.length }),
+      ...(data.count && { count: filteredItems.length })
+    };
   }
 
   async getContentDetail(slug: string, dialect: string = 'har') {
